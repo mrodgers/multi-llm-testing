@@ -30,10 +30,17 @@ pip install panel openai google-cloud-aiplatform
 Run the script to start the server:
 
 ```bash
-python your_script_name.py
+panel serve multi-llm-testing.py 
 ```
 
 Access the web-based interface at the provided URL to interact with the language models.
+
+```bash
+2024-01-21 20:56:53,787 Starting Bokeh server version 3.3.3 (running on Tornado 6.4)
+2024-01-21 20:56:53,789 User authentication hooks NOT provided (default user enabled)
+2024-01-21 20:56:53,790 Bokeh app running at: http://localhost:5006/multi-llm-testing
+2024-01-21 20:56:53,790 Starting Bokeh server with process id: 33749
+```
 
 ## Contributing
 
