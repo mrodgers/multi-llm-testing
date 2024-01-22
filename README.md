@@ -44,7 +44,7 @@ Access the web-based interface at the provided URL to interact with the language
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome. Feel free to check [issues page]() if you want to contribute.
+Contributions, issues, and feature requests are welcome. Feel free to check [issues page](https://github.com/mrodgers/multi-llm-testing/issues) if you want to contribute.
 
 ## License
 
@@ -54,4 +54,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Matt Rodgers - mrodgers.junk@gmail.com
 
-Project Link: [https://github.com/](https://github.com/)
+Project Link: [https://github.com/mrodgers/multi-llm-testing.git](https://github.com/mrodgers/multi-llm-testing.git)
