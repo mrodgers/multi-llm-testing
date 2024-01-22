@@ -13,15 +13,15 @@ import os
 pn.extension()
 
 # OpenAI API key (replace with your actual API key)
-openai.api_key = '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'
+openai.api_key = 'sk-WjH'
 
 # Anthropic API setup
-anthropic = Anthropic(api_key="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")  # Replace with your actual API key
+anthropic = Anthropic(api_key="sk-ant-api03-XDG")  # Replace with your actual API key
 
 # Google Vertex API, this is the google project you are using, also you will need to be logged in to google api
 # pip3 install --upgrade --user google-cloud-aiplatform
 # gcloud auth application-default login
-google_project_id = 'test-cache-12242023'
+google_project_id = 'test-'
 google_location_id = 'us-west1'
 
 # this is the file where responses are saved along side of each other, with latencies
