@@ -2,7 +2,6 @@ import panel as pn
 from ctransformers import AutoModelForCausalLM
 import openai
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
-#from google.cloud import aiplatform
 import vertexai
 from vertexai.preview.generative_models import GenerativeModel, Part
 import time
@@ -42,19 +41,20 @@ print("Anthropic API Key:", anthropic_api_key)
 print("Google Setup: ", google_location_id, google_project_id)
 
 MODEL_ARGUMENTS = {
-    "samantha": {
+        "samantha": {
         "args": ["TheBloke/Dr_Samantha-7B-GGUF"],
         "kwargs": {"model_file": "dr_samantha-7b.Q5_K_M.gguf"},
     },
     "llama": {
-        "args": ["TheBloke/Llama-2-7b-Chat-GGUF"],
-        "kwargs": {"model_file": "llama-2-7b-chat.Q5_K_M.gguf"},
+        "args": ["TheBloke/Llama-2-13b-Chat-GGUF"],
+        "kwargs": {"model_file": "llama-2-13b-chat.Q5_K_M.gguf"},
     },
     "mistral": {
-        "args": ["TheBloke/Mistral-7B-Instruct-v0.1-GGUF"],
-        "kwargs": {"model_file": "mistral-7b-instruct-v0.1.Q4_K_M.gguf"},
-    },
+        "args": ["TheBloke/Mistral-7B-Instruct-v0.2-GGUF"],
+        "kwargs": {"model_file": "mistral-7b-instruct-v0.2.Q6_K.gguf"},
+    }
 }
+
 
 # Google Vertex AI setup
 def generate_text_with_vertex_ai(project_id: str, location: str, query: str) -> str:
@@ -153,8 +153,9 @@ async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
         llm = pn.state.cache[model]
         
         if model == 'samantha': prompt = alpaca_prompt
-        if model == 'llama': prompt = llama_prompt
-        if model == 'mistral': prompt = mistral_prompt
+        elif model == 'llama': prompt = llama_prompt
+        elif model == 'mistral': prompt = mistral_prompt
+        else: prompt = contents
         
         start_time = time.time()
         response = llm(prompt, max_new_tokens=512, stream=False)
