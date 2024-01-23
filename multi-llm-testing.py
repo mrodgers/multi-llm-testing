@@ -9,25 +9,37 @@ import time
 import csv
 import asyncio
 import os
+from dotenv import load_dotenv
+
+# Load the environment variables from .env file
+load_dotenv()
+
+# Accessing the API keys
+openai_api_key = os.getenv('OPENAI_API_KEY')
+anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+
+# Use the API keys in your application
+# For example, setting the OpenAI API key
+openai.api_key = openai_api_key
+
+# Setting up Anthropic API
+anthropic = Anthropic(api_key=anthropic_api_key)
 
 pn.extension()
-
-# OpenAI API key (replace with your actual API key)
-openai.api_key = 'sk-WjH'
-
-# Anthropic API setup
-anthropic = Anthropic(api_key="sk-ant-api03-XDG")  # Replace with your actual API key
 
 # Google Vertex API, this is the google project you are using, also you will need to be logged in to google api
 # pip3 install --upgrade --user google-cloud-aiplatform
 # gcloud auth application-default login
-google_project_id = 'test-'
-google_location_id = 'us-west1'
+google_project_id = os.getenv('GOOGLE_PROJECT_ID')
+google_location_id = os.getenv('GOOGLE_LOCATION_ID')
 
 # this is the file where responses are saved along side of each other, with latencies
 response_filename = 'llm_responses.csv'
 
-
+# After loading the environment variables
+print("OpenAI API Key:", openai_api_key)
+print("Anthropic API Key:", anthropic_api_key)
+print("Google Setup: ", google_location_id, google_project_id)
 
 MODEL_ARGUMENTS = {
     "samantha": {
@@ -89,8 +101,8 @@ async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
     <</SYS>>
     {contents} [/INST]</s>'''
 
-    mistral_prompt = f'''
-    <s>[INST] {contents} [/INST] Model answer</s>'''
+    mistral_prompt = f'''<s>[INST] Please respond to the Question : {contents} [/INST]'''
+
     
     # OpenAI response
     start_time = time.time()
@@ -142,7 +154,7 @@ async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
         
         if model == 'samantha': prompt = alpaca_prompt
         if model == 'llama': prompt = llama_prompt
-        if model == 'mistral': prompt = contents
+        if model == 'mistral': prompt = mistral_prompt
         
         start_time = time.time()
         response = llm(prompt, max_new_tokens=512, stream=False)
