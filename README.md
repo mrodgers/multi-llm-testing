@@ -1,57 +1,61 @@
-# Multi-Model Language Generation Interface
+# Multi-Language Model Integration and Comparison
 
-This repository contains code for an interactive language generation interface that integrates multiple language models, including OpenAI's GPT-3.5, Anthropic's Claude-2.1, and models from Google Vertex AI. The interface is built using Panel for a web-based chat experience and allows users to interact with these models in real-time.
+## Overview
+This repository contains a Python script for integrating and comparing responses from various language models including OpenAI, Anthropic, Google Vertex AI, and PromptMule. The script demonstrates the use of these APIs to generate text based on user inputs and measure response latencies.
 
 ## Features
+- Integration with multiple language models: OpenAI, Anthropic, Google Vertex AI, and PromptMule.
+- Performance measurement in terms of response latencies.
+- CSV logging for response comparison.
+- Use of environment variables for secure API key management.
 
-- Integration with multiple language models including OpenAI's GPT-3.5, Anthropic's Claude-2.1, and Google Vertex AI's generative models.
-- Real-time interaction through a web-based chat interface.
-- Response latency measurement for each model.
-- Response comparison across different models.
-- CSV logging of user prompts, model responses, and response latencies.
+## Prerequisites
+- Python 3.x
+- Access to the APIs of OpenAI, Anthropic, Google Vertex AI, and PromptMule.
+- An `.env` file containing API keys and other necessary configurations.
 
 ## Installation
 
-Before running the script, ensure you have the required dependencies installed:
+To set up the project:
 
-```bash
-pip install panel openai google-cloud-aiplatform
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/mrodgers/multi-llm-integration.git
+   cd multi-llm-integration
+   ```
 
-## Setup
+2. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-1. **OpenAI API Key**: Replace `'sk-ABC'` with your actual OpenAI API key.
-2. **Anthropic API Key**: Replace `'sk-ant-api03-XDGXYZ'` with your actual Anthropic API key.
-3. **Google Cloud Project ID**: Set `google_project_id` to your Google Cloud project ID.
-4. **Google Cloud Location ID**: Set `google_location_id` to the appropriate Google Cloud location.
+3. Create a `.env` file in the root directory with the following content:
+   ```
+   OPENAI_API_KEY=your_openai_api_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key
+   GOOGLE_PROJECT_ID=your_google_project_id
+   GOOGLE_LOCATION_ID=your_google_location_id
+   PROMPTMULE_API_KEY=your_promptmule_api_key
+   ```
 
 ## Usage
 
-Run the script to start the server:
+To run the script:
 
 ```bash
-panel serve multi-llm-testing.py 
+python script_name.py
 ```
 
-Access the web-based interface at the provided URL to interact with the language models.
-
-```bash
-2024-01-21 20:56:53,787 Starting Bokeh server version 3.3.3 (running on Tornado 6.4)
-2024-01-21 20:56:53,789 User authentication hooks NOT provided (default user enabled)
-2024-01-21 20:56:53,790 Bokeh app running at: http://localhost:5006/multi-llm-testing
-2024-01-21 20:56:53,790 Starting Bokeh server with process id: 33749
-```
+Replace `script_name.py` with the actual name of the Python script.
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome. Feel free to check [issues page](https://github.com/mrodgers/multi-llm-testing/issues) if you want to contribute.
+Contributions are welcome! Feel free to submit pull requests or open issues to improve the functionality or address bugs.
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is licensed under [MIT License](LICENSE.md). Feel free to use it according to the license terms.
 
-## Contact
+---
 
-Matt Rodgers - mrodgers.junk@gmail.com
-
-Project Link: [https://github.com/mrodgers/multi-llm-testing.git](https://github.com/mrodgers/multi-llm-testing.git)
+Developed with ❤ by Matt Rodgers
