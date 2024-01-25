@@ -10,6 +10,7 @@ import os
 from dotenv import load_dotenv
 import requests
 
+
 # Load the environment variables from .env file
 load_dotenv()
 
