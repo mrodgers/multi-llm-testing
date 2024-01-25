@@ -17,7 +17,9 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
 
-pn.extension()
+# Leverage the Material Design template
+pn.extension(template='material')
+pn.state.template.param.update(title="Multi LM Chatbot")
 
 # Google Vertex API, this is the google project you are using, also you will need to be logged in to google api
 # pip3 install --upgrade --user google-cloud-aiplatform
@@ -208,6 +210,7 @@ def write_to_csv(prompt, responses, latencies, filename):
 async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
     responses = []
     latencies = []
+    model_names = []
     
     # Define prompts for local LLMs
     alpaca_prompt = f'''Below is an instruction that describes a task. Write a response that appropriately completes the request.
@@ -232,16 +235,23 @@ async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
     # OpenAI response
     print("OpenAI Key: ", openai_api_key)
     openai_response = generate_text_with_openai(openai_api_key, contents)
+    model_names.append("OpenAI")
+
     if openai_api_key:
         openai_latency = time.time() - start_time
         responses.append(openai_response)
         latencies.append(openai_latency)
         instance.stream(openai_response + '\nlatency: ' + str(openai_latency), user="OpenAI", message=None)
     else:
+        responses.append("")
+        latencies.append(0)
         instance.stream(openai_response, user="System", message=None)
+
  
     # Anthropic response
     print("Anthropic Key: ", anthropic_api_key)
+    model_names.append("Anthropic")
+
     if anthropic_api_key:
         start_time = time.time()
         anthropic_response = generate_text_with_anthropic(anthropic_api_key, contents)
@@ -250,12 +260,14 @@ async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
         latencies.append(anthropic_latency)
         instance.stream(anthropic_response.completion + '\nlatency: ' + str(anthropic_latency), user="Anthropic", message=None)
     else:
-        responses.append("Athropic API Key not found.")
+        responses.append("")
         latencies.append(0)
         instance.stream("Anthropic API Key not found.", user="System", message=None)
  
 
     # Google Vertex response
+    model_names.append("Google Vertex AI")
+
     if google_project_id:
         if google_location_id:
             start_time = time.time()
@@ -266,13 +278,19 @@ async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
             instance.stream(vertex_ai_response+ '\nlatency: ' + str(vertex_ai_latency), user="Google Vertex AI", message=None)
         else:
             print("Missing Vertex AI: Google Project Location")
+            responses.append("")
+            latencies.append(0)
             instance.stream("Missing Vertex AI: Google Project Location", user="System", message=None)
     else:
+        responses.append("")
+        latencies.append(0)
         print("Missing Vertex AI: Google Project ID")
         instance.stream("Missing Vertex AI: Google Project ID", user="System", message=None)
 
             
     # PromptMule response
+    model_names.append("PromptMule")
+ 
     if promptmule_api_key:
         start_time = time.time()
         promptmule_response = generate_text_with_promptmule( promptmule_api_key, contents)
@@ -282,42 +300,103 @@ async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
         instance.stream(promptmule_response + '\nlatency: ' + str(promptmule_latency), user="PromptMule", message=None)
     else:
         print("PromptMule API Key not set.")
+        responses.append("")
+        latencies.append(0)
         instance.stream("PromptMule API Key not set. Get one at https://app.promptmule.com", user="System", message=None)
  
     
     
     # delimit SaaS v. Local LLMs
-    #instance.stream('Now trying local LLMs...', user="System", message=None)
  
-    
     for model in MODEL_ARGUMENTS:
-        if model not in pn.state.cache:
-            pn.state.cache[model] = AutoModelForCausalLM.from_pretrained(
-                *MODEL_ARGUMENTS[model]["args"],
-                **MODEL_ARGUMENTS[model]["kwargs"],
-                gpu_layers=30,
-            )
+        try:
+            # Check if the model is already loaded
+            if model not in pn.state.cache:
+                print(f"Loading model: {model}")
+                pn.state.cache[model] = AutoModelForCausalLM.from_pretrained(
+                    *MODEL_ARGUMENTS[model]["args"],
+                    **MODEL_ARGUMENTS[model]["kwargs"],
+                    gpu_layers=30,
+                )
 
-        llm = pn.state.cache[model]
-        
-        if model == 'samantha': prompt = alpaca_prompt
-        if model == 'llama': prompt = llama_prompt
-        if model == 'mistral': prompt = mistral_prompt
-        
-        print("Sending prompt to: ", model)
+            llm = pn.state.cache[model]
 
-        start_time = time.time()
-        response = llm(prompt, max_new_tokens=512, stream=False)
-        model_latency = time.time() - start_time
+            # Set the appropriate prompt based on the model
+            if model == 'samantha':
+                prompt = alpaca_prompt
+            elif model == 'llama':
+                prompt = llama_prompt
+            elif model == 'mistral':
+                prompt = mistral_prompt
+            else:
+                print(f"Warning: No specific prompt found for model {model}. Using a default prompt.")
+                prompt = "Default prompt text"
+
+            print("Sending prompt to: ", model)
+
+            # Generate response and measure latency
+            start_time = time.time()
+            response = llm(prompt, max_new_tokens=512, stream=False)
+            model_latency = time.time() - start_time
+
+            # Stream the response
+            message = None  # Placeholder for any additional processing
+            instance.stream(response.strip() + '\nlatency: ' + str(model_latency), user=model.title(), message=message)
+
+            # Append results to lists
+            model_names.append(model)
+            responses.append(response.strip())
+            latencies.append(model_latency)
+
+        except Exception as e:
+            print(f"Error processing model {model}: {e}")
+ 
+    # for model in MODEL_ARGUMENTS:
+    #     if model not in pn.state.cache:
+    #         pn.state.cache[model] = AutoModelForCausalLM.from_pretrained(
+    #             *MODEL_ARGUMENTS[model]["args"],
+    #             **MODEL_ARGUMENTS[model]["kwargs"],
+    #             gpu_layers=30,
+    #         )
+
+    #     llm = pn.state.cache[model]
         
-        message = None
-        #for chunk in response:
-        #    message = instance.stream(chunk, user=model.title(), message=message)
-        instance.stream(response.strip() + '\nlatency: ' + str(model_latency), user=model.title(), message=message)
+    #     if model == 'samantha': prompt = alpaca_prompt
+    #     if model == 'llama': prompt = llama_prompt
+    #     if model == 'mistral': prompt = mistral_prompt
         
-        responses.append(response.strip())
-        latencies.append(model_latency)
+    #     print("Sending prompt to: ", model)
+
+    #     start_time = time.time()
+    #     response = llm(prompt, max_new_tokens=512, stream=False)
+    #     model_latency = time.time() - start_time
         
+    #     message = None
+    #     #for chunk in response:
+    #     #    message = instance.stream(chunk, user=model.title(), message=message)
+    #     instance.stream(response.strip() + '\nlatency: ' + str(model_latency), user=model.title(), message=message)
+    #     model_names.append(model) 
+    #     responses.append(response.strip())
+    #     latencies.append(model_latency)
+     
+     
+    # summarize latencies
+    #latencies_string = ", ".join([f"{model}: {latency:.3f}" for model, latency in zip(model_names, latencies)])
+    # Determine the maximum length of model names for formatting
+    max_name_length = max(len(name) for name in model_names)
+
+    # Header for the table
+    #table_header = f"{'Model Name':<{max_name_length}} | Latency (s)\n" + "-" * (max_name_length + 15)
+    # Rows of the table
+    table_rows = "\n".join([f"{model:<{max_name_length}} was {latency:.3f}sec" for model, latency in zip(model_names, latencies)])
+
+    # Final table string
+    #latencies_string = table_header + "\n" + table_rows
+    latencies_string = table_rows
+
+    instance.stream(latencies_string, user="LLM Latency Report", message=message)
+
+    
     # Write to CSV
     write_to_csv(contents, responses, latencies, response_filename)
 
