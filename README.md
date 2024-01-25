@@ -10,14 +10,6 @@ This repository contains code for an interactive language generation interface t
 - Response comparison across different models.
 - CSV logging of user prompts, model responses, and response latencies.
 
-## Installation
-
-Before running the script, ensure you have the required dependencies installed:
-
-```bash
-pip install panel openai google-cloud-aiplatform
-```
-
 ## Setup
 
 1. **OpenAI API Key**: Replace `'sk-ABC'` with your actual OpenAI API key.
@@ -30,7 +22,7 @@ pip install panel openai google-cloud-aiplatform
 Run the script to start the server:
 
 ```bash
-panel serve multi-llm-testing.py 
+./run.sh
 ```
 
 Access the web-based interface at the provided URL to interact with the language models.
